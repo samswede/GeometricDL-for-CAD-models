@@ -1,3 +1,6 @@
+# Ignore data folder because files are too large for github
+data/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
