@@ -1,6 +1,9 @@
 # Ignore data folder because files are too large for github
 data/
 
+# Ignore scrap scripts
+scrap*.py
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
