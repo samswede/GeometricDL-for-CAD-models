@@ -4,6 +4,7 @@ from torch_geometric.nn import GATConv, SAGPooling, global_mean_pool
 from torch.nn import Linear
 from torch_geometric.data import Batch
 
+
 class SagPoolGAT(torch.nn.Module):
     """
     Scalable Graph Neural Network with Graph Attention Layers (GAT), Self-Attention Graph Pooling (SAGPooling),

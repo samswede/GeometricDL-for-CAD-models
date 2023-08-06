@@ -3,7 +3,7 @@ from torch import nn
 from torch_geometric.data import DataLoader
 from torch.optim import Adam
 
-from models.gnn import GNN
+from models.sag_pool_gat import SagPoolGAT
 from preprocessing.data_pipeline import DataPipeline
 
 
@@ -69,7 +69,8 @@ hidden_dim = 64
 
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-model = GNN(num_node_features, num_classes, hidden_dim).to(device)
+
+model = SagPoolGAT(num_node_features, num_classes, hidden_dim).to(device)
 optimizer = Adam(model.parameters(), lr=0.01)
 criterion = nn.CrossEntropyLoss()  # Define appropriate loss function
 
@@ -84,7 +85,7 @@ for epoch in range(1, 3):
     print(f'train_acc computed')
     test_acc = test_classifier(model, test_loader)
     print(f'test_acc computed')
-    
+
     print(f'Epoch: {epoch:03d}, Train Loss: {train_loss:.4f}, '
           f'Train Acc: {train_acc:.4f}, Test Acc: {test_acc:.4f}')
 
