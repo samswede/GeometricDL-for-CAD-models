@@ -4,6 +4,9 @@ data/
 # Ignore scrap scripts
 scrap*.py
 
+# Ignore .pt files incase I make a large one
+*.pt
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

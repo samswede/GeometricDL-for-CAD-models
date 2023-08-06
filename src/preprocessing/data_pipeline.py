@@ -9,9 +9,11 @@ from sklearn.model_selection import train_test_split
 import os
 
 class DataPipeline:
-    def __init__(self, data_root_path):
+    def __init__(self, data_root_path, save_path):
         # /Users/samuelandersson/Dev/CodeSprint/GeometricDL-for-CAD-models/data/raw/ModelNet10
+        # '/Users/samuelandersson/Dev/CodeSprint/GeometricDL-for-CAD-models/data/processed'
         self.data_root_path = data_root_path
+        self.save_path = save_path
 
     def load_mesh_from_file(self, file_path):
         # Load the mesh from the OFF file
@@ -42,7 +44,7 @@ class DataPipeline:
         edge_index = torch.tensor(np.vstack([coo_adjacency_matrix.row, coo_adjacency_matrix.col]), dtype=torch.long)
 
         # Convert node features to a tensor feature
-        x = torch.tensor(node_features, dtype=torch.float16)
+        x = torch.tensor(node_features, dtype=torch.float32)
         
         return Data(x=x, edge_index=edge_index)
 
@@ -64,8 +66,11 @@ class DataPipeline:
         return pyg_data
 
 
-    def load_dataset(self):
+    def process_dataset(self):
         """Load the entire dataset from the given directory.
+
+        Args:
+            root_path (str): The root directory of the dataset.
 
         Returns:
             list: A list of PyTorch Geometric data objects.
@@ -73,17 +78,26 @@ class DataPipeline:
         dataset = []
         categories = sorted([c for c in os.listdir(self.data_root_path) if os.path.isdir(os.path.join(self.data_root_path, c))])
         category_to_label = {category: label for label, category in enumerate(categories)}
-        for category in categories:
+
+        print("Starting to load dataset...")
+
+        for category_idx, category in enumerate(categories):
+            print(f"Processing category {category} ({category_idx + 1}/{len(categories)})...")
             for subset in ['train', 'test']:
                 folder_path = os.path.join(self.data_root_path, category, subset)
                 if os.path.isdir(folder_path):
-                    for file_name in os.listdir(folder_path):
-                        if file_name.endswith('.off'):
-                            file_path = os.path.join(folder_path, file_name)
-                            pyg_data = self.process_one_file_coo_vectorised(file_path)
-                            pyg_data.y = torch.tensor(category_to_label[category], dtype=torch.long).unsqueeze(0)  # Add label
-                            dataset.append(pyg_data)
+                    file_names = [f for f in os.listdir(folder_path) if f.endswith('.off')]
+                    for file_idx, file_name in enumerate(file_names):
+                        file_path = os.path.join(folder_path, file_name)
+                        pyg_data = self.process_one_file_coo_vectorised(file_path)
+                        pyg_data.y = torch.tensor(category_to_label[category], dtype=torch.long).unsqueeze(0)  # Add label
+                        dataset.append(pyg_data)
+                        if (file_idx + 1) % 50 == 0:
+                            print(f"  Loaded {file_idx + 1}/{len(file_names)} files from {subset} subset...")
+
+        print("Loading complete!")
         return dataset
+
 
 
     def split_dataset(self, dataset, test_size=0.2):
@@ -112,3 +126,47 @@ class DataPipeline:
         train_loader = DataLoader(train_data, batch_size=batch_size, shuffle=True)
         test_loader = DataLoader(test_data, batch_size=batch_size)
         return train_loader, test_loader
+
+    # def save_dataloader(self, dataloader, file_name):
+    #     """Save the DataLoader to a file.
+
+    #     Args:
+    #         dataloader (DataLoader): The DataLoader to save.
+    #         file_path (str): The path to the file.
+    #     """
+    #     # torch.save(dataloader, self.save_path)
+    #     torch.save(dataloader, f'{self.save_path}/{file_name}')
+
+    def save_dataset(self, dataset, file_name):
+        """Save the PyTorch Geometric dataset to a file.
+
+        Args:
+            dataset (torch_geometric.data.Dataset): The dataset to save.
+            file_name (str): The name of the file.
+        """
+        torch.save(dataset, f'{self.save_path}/{file_name}')
+
+    def load_dataset(self, file_name):
+        """Load a PyTorch Geometric dataset from a file.
+
+        Args:
+            file_name (str): The name of the file.
+
+        Returns:
+            torch_geometric.data.Dataset: The loaded dataset.
+        """
+        return torch.load(f'{self.save_path}/{file_name}')
+
+    def load_dataloader(self, file_name):
+        """Load the DataLoader from a file.
+
+        Args:
+            file_path (str): The path to the file.
+
+        Returns:
+            DataLoader: The loaded DataLoader.
+        """
+        dataset = self.load_dataset(file_name)
+
+        return DataLoader(dataset, batch_size=32, shuffle=True)
+    
