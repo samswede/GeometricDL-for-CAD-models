@@ -144,7 +144,7 @@ class DataPipeline:
             dataset (torch_geometric.data.Dataset): The dataset to save.
             file_name (str): The name of the file.
         """
-        torch.save(dataset, f'{self.save_path}/{file_name}')
+        torch.save(dataset, f'{self.save_path}\{file_name}')
 
     def load_dataset(self, file_name):
         """Load a PyTorch Geometric dataset from a file.
@@ -155,7 +155,7 @@ class DataPipeline:
         Returns:
             torch_geometric.data.Dataset: The loaded dataset.
         """
-        return torch.load(f'{self.save_path}/{file_name}')
+        return torch.load(f'{self.save_path}\{file_name}')
 
     def load_dataloader(self, file_name):
         """Load the DataLoader from a file.
@@ -168,5 +168,5 @@ class DataPipeline:
         """
         dataset = self.load_dataset(file_name)
 
-        return DataLoader(dataset, batch_size=32, shuffle=True)
+        return DataLoader(dataset, batch_size=10, shuffle=True)
     
