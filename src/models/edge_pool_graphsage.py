@@ -33,6 +33,12 @@ class EdgePoolGraphSAGE(torch.nn.Module):
         """
         Forward pass for the EdgePool-GraphSAGE model.
 
+        The EdgePooling layer returns the following:
+            - x (torch.Tensor): The pooled node feature matrix.
+            - edge_index (torch.Tensor): The updated edge index.
+            - edge_attr (torch.Tensor): The edge score indicating the importance of edges (not used in this method).
+            - batch (torch.Tensor): The updated batch vector, which maps each node to its corresponding graph in the batch.
+
         Args:
             data (Batch): Input data containing node features, edge indices, and batch information.
 
@@ -44,11 +50,11 @@ class EdgePoolGraphSAGE(torch.nn.Module):
         # Apply GraphSAGE layers and EdgePooling
         x = self.conv1(x, edge_index)
         x = F.relu(x)
-        x, edge_index, _, batch, _, _ = self.pool1(x, edge_index, batch=batch)
+        x, edge_index, _, batch = self.pool1(x, edge_index, batch=batch)
 
         x = self.conv2(x, edge_index)
         x = F.relu(x)
-        x, _, _, batch, _, _ = self.pool2(x, edge_index, batch=batch)
+        x, edge_index, _, batch = self.pool2(x, edge_index, batch=batch)
 
         # Global pooling (mean pooling)
         x = global_mean_pool(x, batch)
@@ -59,3 +65,4 @@ class EdgePoolGraphSAGE(torch.nn.Module):
         x = self.fc2(x)
 
         return F.log_softmax(x, dim=1)
+
