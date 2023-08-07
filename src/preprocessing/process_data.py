@@ -2,8 +2,8 @@ from utils.performance import Timer
 from preprocessing.data_pipeline import DataPipeline
 
 with Timer('initialise'):
-    data_root_path = '/Users/samuelandersson/Dev/CodeSprint/GeometricDL-for-CAD-models/data/raw/ModelNet10'
-    save_path = '/Users/samuelandersson/Dev/CodeSprint/GeometricDL-for-CAD-models/data/processed'
+    data_root_path = r'C:\Users\Josh\Desktop\Dev\github-repos\GeometricDL-for-CAD-models\data\raw\ModelNet10'
+    save_path = r'C:\Users\Josh\Desktop\Dev\github-repos\GeometricDL-for-CAD-models\data\processed'
 
     file_path = '/Users/samuelandersson/Dev/CodeSprint/GeometricDL-for-CAD-models/data/raw/ModelNet10/chair/train/chair_0001.off'
 
